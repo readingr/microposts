@@ -65,7 +65,7 @@ Microposts::Application.configure do
   # with SQLite, MySQL, and PostgreSQL)
   # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
-  unless Rails.env.production?
-    ENV['PROV_SERVER'] = 'http://127.0.0.1:8000'
-  end
+  # unless Rails.env.production?
+  #   ENV['PROV_SERVER'] = 'http://127.0.0.1:8000'
+  # end
 end

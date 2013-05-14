@@ -36,7 +36,8 @@ Microposts::Application.configure do
   config.assets.debug = true
 
   unless Rails.env.production?
-    ENV['PROV_SERVER'] = 'http://127.0.0.1:8000'
+    ENV['PROV_SERVER'] = 'https://provenance.ecs.soton.ac.uk'
+    # ENV['PROV_SERVER'] = 'http://127.0.0.1:8000'
   end
   
 end

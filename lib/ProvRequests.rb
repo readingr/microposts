@@ -1,20 +1,25 @@
 module ProvRequests
 
 
-#pass in @user.prov_username, @user.access_token and the bundle id you wish to access.
+#pass in @user.prov_username, @user.prov_access_token and the bundle id you wish to access.
 def self.get_request(username, apikey, bundle_number)
+	require 'net/https'
 	require 'net/http'
 	require 'uri'
 
 	uri = URI.parse("#{ENV['PROV_SERVER']}/api/v0/bundle/"+bundle_number.to_s)
+	
+	if uri.scheme == "https"
+		http = Net::HTTP.new(uri.host, 443) 
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+	else
+		http = Net::HTTP.new(uri.host, uri.port)
+	end
 
-	http = Net::HTTP.new(uri.host, uri.port) 
-	#used for secure connections
-	# # http.use_ssl = true
-	# # http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
 	request = Net::HTTP::Get.new(uri.path) 
-	request.add_field("Authorization", "ApiKey "+username+":"+apikey.to_s)
+	request["Authorization"] = "ApiKey "+username+":"+apikey.to_s
 
 	response = http.request(request)
 
@@ -22,51 +27,56 @@ def self.get_request(username, apikey, bundle_number)
 	case response 
 	when Net::HTTPRedirection then
 	  uri = URI.parse(response['location'])
-	  http = Net::HTTP.new(uri.host, uri.port) 
+	  if uri.scheme == "https"
+	  	http = Net::HTTP.new(uri.host, 443) 
+	  	http.use_ssl = true
+	  	http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+	  else
+	  	http = Net::HTTP.new(uri.host, uri.port)
+	  end
 	  request = Net::HTTP::Get.new(uri.path) 
-	  request.add_field("Authorization", "ApiKey "+username+":"+apikey.to_s)
+	  request["Authorization"] = "ApiKey "+username+":"+apikey.to_s
 	  response = http.request(request)
 	end
 
-	# puts "***************"
-	# puts response.body
-	# puts "***************"
-
-	# debugger
-	#return the body of the response.
 	return response.body
 end
 
-#pass in @user.prov_username, @user.access_token, the JSON bundle you wish to send and the name of the file
+#pass in @user.prov_username, @user.prov_access_token, the JSON bundle you wish to send and the name of the file.
+#default permissions is private.
 def self.post_request(username, apikey, bundle, rec_id)
-	# username = current_user.prov_username
-	# apikey = current_user.access_token
+	require 'net/https'
 	require 'net/http'
 	require 'uri'
 
-	puts "***************"
-
 	uri = URI.parse("#{ENV['PROV_SERVER']}/api/v0/bundle/")
 
+	if uri.scheme == "https"
+		http = Net::HTTP.new(uri.host, 443) 
+		http.use_ssl = true
+		http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+	else
+		http = Net::HTTP.new(uri.host, uri.port)
+	end
 
-	net = Net::HTTP.new(uri.path, uri.port)
 	request = Net::HTTP::Post.new("/api/v0/bundle/")
 
-	request.body = '{"rec_id":"'+rec_id+'","public":"False","content":'+bundle.to_json+',"url":"https://dl.dropbox.com/u/13708408/test.json"}'
+	request.body = '{"rec_id":"'+rec_id+'","private":"True","content":'+bundle.to_json+'}'
 	
 	request["Authorization"] = "ApiKey "+username+":"+apikey.to_s
 	request["Content-Type"] = "application/json"
 
-	response = Net::HTTP.start(uri.hostname, uri.port) do |http|
-		http.request(request)
+	response = http.request(request)
+
+	case response 
+	when Net::HTTPRedirection then
+ 	  request = Net::HTTP::Post.new("/api/v0/bundle/")
+	  request.body = '{"rec_id":"'+rec_id+'","private":"True","content":'+bundle.to_json+'}'
+	  request["Authorization"] = "ApiKey "+username+":"+apikey.to_s
+	  request["Content-Type"] = "application/json"
+	  response = http.request(request)
 	end
 
-	# puts "***************"
-	# puts response.body
-	# puts "***************"
-
-	# debugger
-	#return the body of the response.
 	return response.body
 
 end
