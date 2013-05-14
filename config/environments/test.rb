@@ -40,7 +40,7 @@ Microposts::Application.configure do
   silence_warnings do
     BCrypt::Engine::DEFAULT_COST = BCrypt::Engine::MIN_COST
   end
-    unless Rails.env.production?
-    ENV['PROV_SERVER'] = 'http://127.0.0.1:8000'
-  end
+  #   unless Rails.env.production?
+  #   ENV['PROV_SERVER'] = 'http://127.0.0.1:8000'
+  # end
 end

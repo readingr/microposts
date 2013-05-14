@@ -159,7 +159,8 @@ class Micropost < ActiveRecord::Base
 
 
     rec_id = "Micropost"+self.id.to_s
-# debugger
+
+    # debugger
     prov_json_results = ProvRequests.post_request(self.user.prov_username, self.user.access_token, new_bundle, rec_id)
     
 
